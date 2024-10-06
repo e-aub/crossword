@@ -42,16 +42,14 @@ const crosswordSolver = (puzzle, words) => {
     const resolved1 = placeWords(grid1, words, wordStartTracker2);
     const result = printPuzzle(grid);
     const result1 = printPuzzle(grid1, '\n');
-    console.log(resolved, resolved1)
-    console.log(result == result1)
     if (resolved) {
         if (resolved1 && result !== result1) {
-            console.log('Error2');
+            console.log('Error');
             return
         }
         console.log(printPuzzle(grid));
     } else {
-        console.log('Error2');
+        console.log('Error');
 
     }
 }
@@ -169,45 +167,7 @@ const printPuzzle = grid => {
     return grid.map(row => row.join('')).join('\n');
 }
 
-let puzzle = `...1...........
-..1000001000...
-...0....0......
-.1......0...1..
-.0....100000000
-100000..0...0..
-.0.....1001000.
-.0.1....0.0....
-.10000000.0....
-.0.0......0....
-.0.0.....100...
-...0......0....
-..........0....`
-let words = [
-    'sun',
-    'sunglasses',
-    'suncream',
-    'swimming',
-    'bikini',
-    'beach',
-    'icecream',
-    'tan',
-    'deckchair',
-    'sand',
-    'seaside',
-    'sandals',
-].reverse()
-
-
-crosswordSolver(puzzle, words);
-console.log("case 2");
-puzzle = '2000\n0...\n0...\n0...'
-words = ['abba', 'assa']
-crosswordSolver(puzzle, words);
-console.log("case 3");
-puzzle = '0001\n0..0\n3000\n0..0'
-words = ['casa', 'alan', 'ciao', 'anta']
-
-// const puzzle = '2001\n0..0\n1000\n0..0'
-// const words = ['casa', 'alan', 'ciao', 'anta']
+const puzzle = '2001\n0..0\n1000\n0..0'
+const words = ['aaab', 'aaac', 'aaad', 'aaae']
 
 crosswordSolver(puzzle, words); 
