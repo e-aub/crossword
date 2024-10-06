@@ -41,7 +41,7 @@ const crosswordSolver = (puzzle, words) => {
     words.reverse()
     const resolved1 = placeWords(grid1, words, wordStartTracker2);
     const result = printPuzzle(grid);
-    const result1 = printPuzzle(grid1, '\n');
+    const result1 = printPuzzle(grid1);
     if (resolved) {
         if (resolved1 && result !== result1) {
             console.log('Error');
@@ -50,7 +50,6 @@ const crosswordSolver = (puzzle, words) => {
         console.log(printPuzzle(grid));
     } else {
         console.log('Error');
-
     }
 }
 
@@ -139,6 +138,7 @@ const placeWords = (grid, words, tracker, index = 0) => {
 
     const word = words[index];
     for (let key of tracker.keys()) {
+        // Try horizontal placement
         if (canPlaceHorizontally(grid, word, key, tracker)) {
             const state = saveState(grid, tracker);
             placeByDir(grid, word, key, tracker, "H");
@@ -160,8 +160,6 @@ const placeWords = (grid, words, tracker, index = 0) => {
     }
     return false;
 }
-
-
 
 const printPuzzle = grid => {
     return grid.map(row => row.join('')).join('\n');
