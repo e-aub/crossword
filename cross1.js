@@ -8,20 +8,32 @@ const crosswordSolver = (puzzle, words) => {
     const grid = puzzle.split('\n').map(row => row.split(''));
     const grid1 = grid.map(row => [...row])
     // Create tracking object for word starts
-    const wordStartTracker = {}, wordStartTracker2 = {};
+    const wordStartTracker = new Map, wordStartTracker2 = new Map;
 
     // Initialize tracker from grid
+    var wordsCount = 0;
     for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[0].length; j++) {
-            if (!isNaN(grid[i][j]) && parseInt(grid[i][j]) > 0) {
-                wordStartTracker[`${i},${j}`] = parseInt(grid[i][j]);
-                wordStartTracker2[`${i},${j}`] = parseInt(grid[i][j]);
+            let isNan = isNaN(grid[i][j]);
+            let startWord = parseInt(grid[i][j]);
+            if (!isNan && startWord > 0) {
+                if (startWord > 2) {
+                    console.log("Error")
+                    return
+                }
+                wordsCount += startWord
+                wordStartTracker.set([i, j], startWord)
+                wordStartTracker2.set([i, j], startWord)
             }
         }
     }
+    if (wordsCount != words.length) {
+        console.log("Error")
+        return
+    }
 
-    if (!isValidInput(grid, words, wordStartTracker)) {
-        console.log('Error');
+    if (!isValidInput(words)) {
+        console.log('Error1');
         return;
     }
     placeWords(grid, words, wordStartTracker);
@@ -36,44 +48,32 @@ const crosswordSolver = (puzzle, words) => {
     }
 }
 
-const isValidInput = (grid, words, tracker) => {
+const isValidInput = (words) => {
     // Check for duplicate words
     const wordSet = new Set(words);
-    if (wordSet.size !== words.length) return false;
-
-    // Check if total required word starts matches number of words
-    const totalRequired = Object.values(tracker).reduce((sum, count) => sum + count, 0);
-    if (totalRequired !== words.length) return false;
-
-    return true;
+    return wordSet.size === words.length
 }
 
-const canPlaceHorizontally = (grid, word, row, col, tracker) => {
-    // Check if word fits within grid
-    if (col + word.length > grid[0].length) return false;
+const canPlaceHorizontally = (grid, word, key, tracker) => {
+    if (key[1] + word.length > grid[0].length) return false;
 
-    // Check if we can start a word here
-    const key = `${row},${col}`;
-    const remainingStarts = tracker[key] || 0;
+    const remainingStarts = tracker.get(key) || 0;
 
-    // If this isn't a valid start position or no more words can start here
-    if ((!isNaN(grid[row][col]) && parseInt(grid[row][col]) === 0) || remainingStarts === 0) {
+    if (remainingStarts === 0) {
         return false;
     }
 
-    // Check for conflicts with existing letters and dots
     for (let i = 0; i < word.length; i++) {
-        const cell = grid[row][col + i];
+        const cell = grid[key[0]][[key[1]] + i];
         if (cell === '.') return false;
         if (isNaN(cell) && cell !== word[i]) return false;
     }
-
     return true;
 }
 
-const canPlaceVertically = (grid, word, row, col, tracker) => {
+const canPlaceVertically = (grid, word, key, tracker) => {
     // Check if word fits within grid
-    if (row + word.length > grid.length) return false;
+    if (key[0] + word.length > grid.length) return false;
 
     // Check if we can start a word here
     const key = `${row},${col}`;
@@ -141,38 +141,35 @@ const restoreState = (grid, tracker, state) => {
 const placeWords = (grid, words, tracker, index = 0) => {
     // Base case: all words placed
     if (index === words.length) {
-        // Check if all positions have used their required number of starts
-        console.log(tracker)
-        return Object.values(tracker).every(count => count === 0);
+        return true
     }
 
     const word = words[index];
-    for (let row = 0; row < grid.length; row++) {
-        for (let col = 0; col < grid[0].length; col++) {
-            // Try horizontal placement
-            if (canPlaceHorizontally(grid, word, row, col, tracker)) {
-                const state = saveState(grid, tracker);
-                placeWordHorizontally(grid, word, row, col, tracker);
-                if (placeWords(grid, words, tracker, index + 1)) {
-                    return true;
-                }
-                restoreState(grid, tracker, state);
+    for (let key of tracker.key()) {
+        // Try horizontal placement
+        if (canPlaceHorizontally(grid, word, key, tracker)) {
+            const state = saveState(grid, tracker);
+            placeWordHorizontally(grid, word, key, tracker);
+            if (placeWords(grid, words, tracker, index + 1)) {
+                return true;
             }
+            restoreState(grid, tracker, state);
+        }
 
-            // Try vertical placement
-            if (canPlaceVertically(grid, word, row, col, tracker)) {
-                const state = saveState(grid, tracker);
-                placeWordVertically(grid, word, row, col, tracker);
-                if (placeWords(grid, words, tracker, index + 1)) {
-                    return true;
-                }
-                restoreState(grid, tracker, state);
+        // Try vertical placement
+        if (canPlaceVertically(grid, word, key, tracker)) {
+            const state = saveState(grid, tracker);
+            placeWordVertically(grid, word, key, tracker);
+            if (placeWords(grid, words, tracker, index + 1)) {
+                return true;
             }
+            restoreState(grid, tracker, state);
         }
     }
-
     return false;
 }
+
+
 
 const printPuzzle = grid => {
     return grid.map(row => row.join('')).join('\n');
@@ -192,24 +189,28 @@ let puzzle = `...1...........
 ...0......0....
 ..........0....`
 let words = [
-  'sun',
-  'sunglasses',
-  'suncream',
-  'swimming',
-  'bikini',
-  'beach',
-  'icecream',
-  'tan',
-  'deckchair',
-  'sand',
-  'seaside',
-  'sandals',
+    'sun',
+    'sunglasses',
+    'suncream',
+    'swimming',
+    'bikini',
+    'beach',
+    'icecream',
+    'tan',
+    'deckchair',
+    'sand',
+    'seaside',
+    'sandals',
 ].reverse()
 
 
-crosswordSolver(puzzle, words); 
-
- puzzle = '2000\n0...\n0...\n0...'
- words = ['abba', 'assa']
+crosswordSolver(puzzle, words);
+console.log("case 2");
+puzzle = '2000\n0...\n0...\n0...'
+words = ['abba', 'assa']
+crosswordSolver(puzzle, words);
+console.log("case 3");
+puzzle = '0001\n0..0\n3000\n0..0'
+words = ['casa', 'alan', 'ciao', 'anta']
 
 crosswordSolver(puzzle, words); 
