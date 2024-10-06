@@ -1,15 +1,21 @@
 const crosswordSolver = (puzzle, words) => {
+    if (typeof puzzle !== 'string' || !Array.isArray(words)) {
+        console.log('Error')
+        return
+    }
+
     // Convert puzzle to grid
     const grid = puzzle.split('\n').map(row => row.split(''));
-
+    const grid1 = puzzle.split('\n').map(row => row.split(''));
     // Create tracking object for word starts
-    const wordStartTracker = {};
+    const wordStartTracker = {}, xr = {};
 
     // Initialize tracker from grid
     for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[0].length; j++) {
             if (!isNaN(grid[i][j]) && parseInt(grid[i][j]) > 0) {
                 wordStartTracker[`${i},${j}`] = parseInt(grid[i][j]);
+                xr[`${i},${j}`] = parseInt(grid[i][j]);
             }
         }
     }
@@ -18,10 +24,12 @@ const crosswordSolver = (puzzle, words) => {
         console.log('Error');
         return;
     }
-
-    const solved = placeWords(grid, words, wordStartTracker);
-
-    if (solved) {
+    placeWords(grid, words, wordStartTracker);
+    words.reverse()
+    placeWords(grid1, words, xr);
+    const result = printPuzzle(grid);
+    const result1 = printPuzzle(grid1);
+    if (result == result1) {
         console.log(printPuzzle(grid));
     } else {
         console.log('Error');
@@ -169,7 +177,38 @@ const printPuzzle = grid => {
     return grid.map(row => row.join('')).join('\n');
 }
 
-const puzzle = '2001\n0..0\n1000\n0..0'
-const words = ['casa', 'alan', 'ciao', 'anta']
+let puzzle = `...1...........
+..1000001000...
+...0....0......
+.1......0...1..
+.0....100000000
+100000..0...0..
+.0.....1001000.
+.0.1....0.0....
+.10000000.0....
+.0.0......0....
+.0.0.....100...
+...0......0....
+..........0....`
+let words = [
+  'sun',
+  'sunglasses',
+  'suncream',
+  'swimming',
+  'bikini',
+  'beach',
+  'icecream',
+  'tan',
+  'deckchair',
+  'sand',
+  'seaside',
+  'sandals',
+].reverse()
 
-crosswordSolver(puzzle, words);
+
+crosswordSolver(puzzle, words); 
+
+ puzzle = '2000\n0...\n0...\n0...'
+ words = ['abba', 'assa']
+
+crosswordSolver(puzzle, words); 
