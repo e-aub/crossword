@@ -6,16 +6,16 @@ const crosswordSolver = (puzzle, words) => {
 
     // Convert puzzle to grid
     const grid = puzzle.split('\n').map(row => row.split(''));
-    const grid1 = puzzle.split('\n').map(row => row.split(''));
+    const grid1 = grid.map(row => [...row])
     // Create tracking object for word starts
-    const wordStartTracker = {}, xr = {};
+    const wordStartTracker = {}, wordStartTracker2 = {};
 
     // Initialize tracker from grid
     for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[0].length; j++) {
             if (!isNaN(grid[i][j]) && parseInt(grid[i][j]) > 0) {
                 wordStartTracker[`${i},${j}`] = parseInt(grid[i][j]);
-                xr[`${i},${j}`] = parseInt(grid[i][j]);
+                wordStartTracker2[`${i},${j}`] = parseInt(grid[i][j]);
             }
         }
     }
@@ -26,7 +26,7 @@ const crosswordSolver = (puzzle, words) => {
     }
     placeWords(grid, words, wordStartTracker);
     words.reverse()
-    placeWords(grid1, words, xr);
+    placeWords(grid1, words, wordStartTracker2);
     const result = printPuzzle(grid);
     const result1 = printPuzzle(grid1);
     if (result == result1) {
@@ -142,6 +142,7 @@ const placeWords = (grid, words, tracker, index = 0) => {
     // Base case: all words placed
     if (index === words.length) {
         // Check if all positions have used their required number of starts
+        console.log(tracker)
         return Object.values(tracker).every(count => count === 0);
     }
 
